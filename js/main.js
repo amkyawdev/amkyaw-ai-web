@@ -1,13 +1,7 @@
-// Main module - The Brain Molecule
-// Coordinates all other modules: database and UI (local dataset only)
+// Main module - Orchestrator
 
-// Debug alert to check if file is loading
-console.log('main.js is loading...');
-
-import { loadKnowledgeBase, findLocalAnswer } from './database.js';
+import { findLocalAnswer } from './database.js';
 import { addMessage, showTypingIndicator, removeTypingIndicator, scrollToBottom, clearMessages, setSuggestionHandlers } from './ui-manager.js';
-
-console.log('Imports done');
 
 // DOM Elements
 const userInput = document.getElementById('user-input');
@@ -26,18 +20,10 @@ let isProcessing = false;
 async function init() {
     console.log('🤖 Amkyaw AI initializing...');
     
-    // Load knowledge base from CSV
-    await loadKnowledgeBase();
-    
     // Set up event listeners
     setupEventListeners();
     
     console.log('✅ Amkyaw AI ready!');
-    
-    // Debug: Test button click
-    document.getElementById('send-btn').addEventListener('click', () => {
-        console.log('Send button clicked!');
-    });
 }
 
 /**
@@ -65,13 +51,17 @@ function setupEventListeners() {
     newChatBtn.addEventListener('click', handleNewChat);
     
     // Sidemenu toggle
-    menuToggle.addEventListener('click', () => {
-        sidemenu.classList.add('active');
-    });
+    if (menuToggle && sidemenu) {
+        menuToggle.addEventListener('click', () => {
+            sidemenu.classList.add('active');
+        });
+    }
     
-    closeSidemenu.addEventListener('click', () => {
-        sidemenu.classList.remove('active');
-    });
+    if (closeSidemenu && sidemenu) {
+        closeSidemenu.addEventListener('click', () => {
+            sidemenu.classList.remove('active');
+        });
+    }
     
     // Suggestion buttons
     setSuggestionHandlers((text) => {
@@ -93,7 +83,7 @@ async function handleSendMessage() {
     userInput.style.height = 'auto';
     
     // Add user message to UI
-    addMessage('user', message);
+    addMessage('user', message, false);
     
     // Process the message
     await processMessage(message);
@@ -107,21 +97,22 @@ async function processMessage(message) {
     isProcessing = true;
     
     try {
-        // Step 1: Check local knowledge base first
-        let response = findLocalAnswer(message);
+        // Show typing indicator
+        const indicator = showTypingIndicator();
         
-        if (response) {
-            // Found in local database
-            console.log('📚 Found answer in local database');
-            addMessage('assistant', response);
-        } else {
-            // Not found in local database
-            console.log('⚠️ No answer found in local database');
-            addMessage('assistant', 'မင်္ဂလာပါ၊ ဒီမေးခွန်းရဲ့ အဖြေကို ကျွန်တော်မသိပါဘူး။ နောက်ထပ် မေးခွန်းတစ်ခုခုမေးပါကွာ။');
-        }
+        // Get response from local CSV database
+        const response = await findLocalAnswer(message);
+        
+        // Remove typing indicator
+        removeTypingIndicator();
+        
+        // Add assistant response with streaming effect
+        addMessage('assistant', response, true);
+        
     } catch (error) {
         console.error('Error processing message:', error);
-        addMessage('assistant', 'အမှားဖြစ်သွားပါတယ်။ နောက်တစ်ခါ ကြိုးစားပါကွာ။');
+        removeTypingIndicator();
+        addMessage('assistant', 'အမှားဖြစ်သွားပါတယ်။ နောက်တစ်ခါ ကြိုးစားပါကွာ။', false);
     } finally {
         isProcessing = false;
     }

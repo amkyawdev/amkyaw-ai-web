@@ -1,0 +1,5 @@
+role,content
+user,website လုပ်ချင်ပါ
+assistant,Website လုပ်ဖို့အတွက် HTML, CSS, JavaScript လိုအပါတါတယ်။ နောက်ထပ် အသေးစိတ်မေးပါကွာ။
+user,web development သင်ချင်ပါ
+assistant,Web Development သည် Frontend နဲ့ Backend ပါဝင်ပါတယ်။ React, Vue, Angular စတာများသုံးပါတယ်။

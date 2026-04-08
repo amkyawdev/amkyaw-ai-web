@@ -1,0 +1,7 @@
+role,content
+user,python ဘယ်လိုသင်လို့ရလဲ
+assistant,Python သင်ခန်းစာများအတွက် ကျွန်တော်မှာ အရင်းအမြစ်များစီးပါ။ သင်လို့လိုပါတယ်။
+user,javascript လေ့လာချင်ပါ
+assistant,JavaScript သည် Web Development အတွက် အရေးပါတပါတယ်။ HTML, CSS နဲ့ ပေါင်းသုံးပါတယ်။
+user,react ဘယ်လိုသုံးရလဲ
+assistant,React သည် JavaScript Library ဖြစ်ပါတယ်။ Component များပါပါတယ်။
