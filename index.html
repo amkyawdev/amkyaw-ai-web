@@ -80,7 +80,7 @@
             </header>
 
 
-            <div class="flex-1 overflow-y-auto flex flex-col items-center" id="chat-container">
+            <div class="flex-1 overflow-y-auto flex flex-col items-center pb-24" id="chat-container">
                 
                 <div class="mt-24 mb-12 flex flex-col items-center text-center px-6" id="welcome-screen">
                     <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-sm border border-indigo-100/50">
@@ -106,7 +106,7 @@
             </div>
 
 
-            <footer class="w-full max-w-3xl mx-auto p-6">
+            <footer class="w-full max-w-3xl mx-auto p-6 fixed bottom-0 left-0 right-0">
                 <div class="relative flex items-end bg-white border border-gray-200 rounded-2xl p-2 shadow-xl focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all duration-300">
                     <textarea 
                         id="user-input"
@@ -116,9 +116,6 @@
                     ></textarea>
                     
                     <div class="flex items-center gap-2 p-1">
-                        <button class="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition" title="Attach file">
-                            <i class="fa-solid fa-paperclip"></i>
-                        </button>
                         <button class="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-200 transition" id="send-btn">
                             <i class="fa-solid fa-arrow-up"></i>
                         </button>
