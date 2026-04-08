@@ -1,10 +1,11 @@
 // Database module - Memory Molecule
-// Fetches CSV and converts to JSON Array
-
-import { config } from './config.js';
+// Fetches CSV from HuggingFace and converts to JSON Array
 
 // Store for the knowledge base
 let knowledgeBase = [];
+
+// HuggingFace dataset URL
+const DATASET_URL = 'https://huggingface.co/datasets/amkyawdev/AmkyawDev-Dataset/resolve/main';
 
 /**
  * Fetch CSV file and convert to JSON array
@@ -12,8 +13,12 @@ let knowledgeBase = [];
  */
 export async function loadKnowledgeBase() {
     try {
-        // Load from all three CSV files
-        const files = ['./data/train.csv', './data/test.csv', './data/validation.csv'];
+        // Load from all three CSV files from HuggingFace
+        const files = [
+            `${DATASET_URL}/train.csv`,
+            `${DATASET_URL}/test.csv`,
+            `${DATASET_URL}/validation.csv`
+        ];
         const allData = [];
         
         for (const file of files) {
@@ -23,7 +28,7 @@ export async function loadKnowledgeBase() {
                     const csvText = await response.text();
                     const parsed = parseCSV(csvText);
                     allData.push(...parsed);
-                    console.log(`Loaded ${parsed.length} entries from ${file}`);
+                    console.log(`Loaded ${parsed.length} entries from ${file.split('/').pop()}`);
                 }
             } catch (e) {
                 console.warn(`Could not load ${file}:`, e);

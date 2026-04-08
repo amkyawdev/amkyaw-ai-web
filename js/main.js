@@ -1,8 +1,7 @@
 // Main module - The Brain Molecule
-// Coordinates all other modules: database, API, and UI
+// Coordinates all other modules: database and UI (local dataset only)
 
 import { loadKnowledgeBase, findLocalAnswer } from './database.js';
-import { getAIResponse, isAPIConfigured } from './api.js';
 import { addMessage, showTypingIndicator, removeTypingIndicator, scrollToBottom, clearMessages, setSuggestionHandlers } from './ui-manager.js';
 
 // DOM Elements
