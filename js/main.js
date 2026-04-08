@@ -3,25 +3,31 @@
 import { findLocalAnswer } from './database.js';
 import { addMessage, showTypingIndicator, removeTypingIndicator, scrollToBottom, clearMessages, setSuggestionHandlers } from './ui-manager.js';
 
-// DOM Elements
-const userInput = document.getElementById('user-input');
-const sendBtn = document.getElementById('send-btn');
-const newChatBtn = document.getElementById('new-chat-btn');
-const menuToggle = document.getElementById('menu-toggle');
-const sidemenu = document.getElementById('sidemenu');
-const closeSidemenu = document.getElementById('close-sidemenu');
-const chatList = document.getElementById('chat-list');
-
 // State
 let isProcessing = false;
 let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
 let currentMessages = [];
+
+// DOM Elements - will be selected in init
+let userInput, sendBtn, newChatBtn, menuToggle, sidemenu, closeSidemenu, chatList;
 
 /**
  * Initialize the application
  */
 function init() {
     console.log('🤖 Amkyaw AI initializing...');
+    
+    // Get DOM elements inside init
+    userInput = document.getElementById('user-input');
+    sendBtn = document.getElementById('send-btn');
+    newChatBtn = document.getElementById('new-chat-btn');
+    menuToggle = document.getElementById('menu-toggle');
+    sidemenu = document.getElementById('sidemenu');
+    closeSidemenu = document.getElementById('close-sidemenu');
+    chatList = document.getElementById('chat-list');
+    
+    console.log('🔔 userInput:', userInput);
+    console.log('🔔 sendBtn:', sendBtn);
     
     // Render chat history
     renderChatHistory();
