@@ -9,6 +9,9 @@ import { addMessage, showTypingIndicator, removeTypingIndicator, scrollToBottom,
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 const newChatBtn = document.getElementById('new-chat-btn');
+const menuToggle = document.getElementById('menu-toggle');
+const sidemenu = document.getElementById('sidemenu');
+const closeSidemenu = document.getElementById('close-sidemenu');
 
 // State
 let isProcessing = false;
@@ -51,6 +54,15 @@ function setupEventListeners() {
     
     // New chat button
     newChatBtn.addEventListener('click', handleNewChat);
+    
+    // Sidemenu toggle
+    menuToggle.addEventListener('click', () => {
+        sidemenu.classList.add('active');
+    });
+    
+    closeSidemenu.addEventListener('click', () => {
+        sidemenu.classList.remove('active');
+    });
     
     // Suggestion buttons
     setSuggestionHandlers((text) => {

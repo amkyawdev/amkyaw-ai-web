@@ -12,11 +12,26 @@ let knowledgeBase = [];
  */
 export async function loadKnowledgeBase() {
     try {
-        const response = await fetch('./data/train.csv');
-        const csvText = await response.text();
+        // Load from all three CSV files
+        const files = ['./data/train.csv', './data/test.csv', './data/validation.csv'];
+        const allData = [];
         
-        knowledgeBase = parseCSV(csvText);
-        console.log('Knowledge base loaded:', knowledgeBase.length, 'entries');
+        for (const file of files) {
+            try {
+                const response = await fetch(file);
+                if (response.ok) {
+                    const csvText = await response.text();
+                    const parsed = parseCSV(csvText);
+                    allData.push(...parsed);
+                    console.log(`Loaded ${parsed.length} entries from ${file}`);
+                }
+            } catch (e) {
+                console.warn(`Could not load ${file}:`, e);
+            }
+        }
+        
+        knowledgeBase = allData;
+        console.log('Total knowledge base loaded:', knowledgeBase.length, 'entries');
         return knowledgeBase;
     } catch (error) {
         console.error('Error loading knowledge base:', error);
@@ -25,9 +40,9 @@ export async function loadKnowledgeBase() {
 }
 
 /**
- * Parse CSV text to JSON array
+ * Parse CSV text to JSON array (with messages JSON column)
  * @param {string} csvText - CSV content
- * @returns {Array} Array of objects
+ * @returns {Array} Array of {role, content} objects
  */
 function parseCSV(csvText) {
     const lines = csvText.trim().split('\n');
@@ -38,17 +53,33 @@ function parseCSV(csvText) {
         const line = lines[i].trim();
         if (!line) continue;
         
-        // Handle CSV with quotes
-        const match = line.match(/^([^,]*),(.+)$/);
-        if (match) {
-            const role = match[1].trim();
+        try {
+            // The CSV has two columns: messages (JSON array), tags
+            // Find the first comma to separate columns
+            const firstComma = line.indexOf(',');
+            if (firstComma === -1) continue;
+            
+            let messagesStr = line.substring(0, firstComma).trim();
             // Remove surrounding quotes if present
-            let content = match[2].trim();
-            if (content.startsWith('"') && content.endsWith('"')) {
-                content = content.slice(1, -1);
+            if (messagesStr.startsWith('"') && messagesStr.endsWith('"')) {
+                messagesStr = messagesStr.slice(1, -1);
             }
             
-            result.push({ role, content });
+            // Parse the JSON messages array
+            const messages = JSON.parse(messagesStr);
+            
+            // Extract user and assistant messages
+            for (const msg of messages) {
+                if (msg.role === 'user' || msg.role === 'assistant') {
+                    result.push({
+                        role: msg.role,
+                        content: msg.content
+                    });
+                }
+            }
+        } catch (e) {
+            // Skip malformed rows
+            console.warn('Skipping malformed row:', e);
         }
     }
     
