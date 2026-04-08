@@ -4,34 +4,30 @@
 // Store for the knowledge base
 let knowledgeBase = [];
 
+// HuggingFace dataset
+const HF_DATASET = 'amkyawdev/myanmar-llm-dataset';
+
 /**
  * Load knowledge base from HuggingFace dataset
  * @returns {Promise<Array>} Array of {role, content} objects
  */
 export async function loadKnowledgeBase() {
     try {
-        // Use GitHub raw URLs for amkyaw-mobile-v1 data
-        const datasetUrl = 'https://raw.githubusercontent.com/amkyawdev/amkyaw-mobile-v1/main';
-        
-        // Try to load from different possible data files
-        const possibleFiles = [
-            'data-layer/amkyaw_v2_gold.jsonl',
-            'data/train.jsonl',
-            'data/train.csv'
-        ];
+        // Use HuggingFace raw file URLs
+        const baseUrl = 'https://huggingface.co/datasets/amkyawdev/myanmar-llm-dataset/resolve/main';
+        const files = ['train.jsonl', 'test.jsonl', 'validation.jsonl'];
         
         const allData = [];
         
-        for (const file of possibleFiles) {
+        for (const file of files) {
             try {
-                const response = await fetch(`${datasetUrl}/${file}`);
+                const response = await fetch(`${baseUrl}/${file}`);
                 if (response.ok) {
                     const text = await response.text();
-                    const parsed = parseData(text, file);
+                    const parsed = parseJSONL(text);
                     if (parsed.length > 0) {
                         allData.push(...parsed);
                         console.log(`Loaded ${parsed.length} entries from ${file}`);
-                        break;
                     }
                 }
             } catch (e) {
@@ -39,7 +35,6 @@ export async function loadKnowledgeBase() {
             }
         }
         
-        // If still no data, load sample data
         if (allData.length === 0) {
             console.log('Using sample data');
             allData.push(...getSampleData());
