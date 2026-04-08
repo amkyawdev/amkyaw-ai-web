@@ -1,13 +1,8 @@
 // Configuration settings for Amkyaw AI
-// Replace 'YOUR_API_KEY' with your actual Groq API key
-// Get your free API key at: https://console.groq.com/
+// This version uses local dataset only (no Groq API)
 
 export const config = {
-    // Groq API Configuration
-    apiKey: 'gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
-    
-    // AI Model Configuration
+    // AI Model Configuration (for reference only)
     model: 'llama-3.1-8b-instant',
     temperature: 0.7,
     maxTokens: 1024,

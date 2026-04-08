@@ -106,28 +106,9 @@ async function processMessage(message) {
             console.log('📚 Found answer in local database');
             addMessage('assistant', response);
         } else {
-            // Not found locally - check if API is configured
-            if (isAPIConfigured()) {
-                console.log('🌐 Calling Groq API...');
-                
-                // Show typing indicator
-                const indicator = showTypingIndicator();
-                
-                try {
-                    // Get response from Groq API
-                    response = await getAIResponse(message);
-                    removeTypingIndicator();
-                    addMessage('assistant', response);
-                } catch (error) {
-                    removeTypingIndicator();
-                    console.error('API Error:', error);
-                    addMessage('assistant', 'တောင်းပါးပါတယ်၊ အမှားဖြစ်သွားပါတယ်။ နောက်တစ်ခါ ကြိုးစားပါကွာ။');
-                }
-            } else {
-                // API not configured
-                console.log('⚠️ API not configured');
-                addMessage('assistant', 'မင်္ဂလာပါ၊ ဒီမေးခွန်းရဲ့ အဖြေကို ကျွန်တော်မသိပါဘူး။ Groq API Key ထည်းဝင်ပါလား။');
-            }
+            // Not found in local database
+            console.log('⚠️ No answer found in local database');
+            addMessage('assistant', 'မင်္ဂလာပါ၊ ဒီမေးခွန်းရဲ့ အဖြေကို ကျွန်တော်မသိပါဘူး။ နောက်ထပ် မေးခွန်းတစ်ခုခုမေးပါကွာ။');
         }
     } catch (error) {
         console.error('Error processing message:', error);
