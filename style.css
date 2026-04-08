@@ -169,20 +169,32 @@
     }
 }
 
-/* Sidemenu - Slide in from left */
+/* Sidemenu - Always visible */
 #sidemenu {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateX(-100%);
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 50;
+    position: relative;
+    transform: none;
     box-shadow: var(--shadow-xl);
 }
 
 #sidemenu.active {
-    transform: translateX(0);
+    transform: none;
+}
+
+/* Mobile: slide in/out */
+@media (max-width: 768px) {
+    #sidemenu {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateX(-100%);
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 50;
+    }
+
+    #sidemenu.active {
+        transform: translateX(0);
+    }
 }
 
 /* Welcome Screen Enhancement */
