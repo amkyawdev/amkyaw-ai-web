@@ -1,38 +1,55 @@
 // Database module - Memory Molecule
-// Fetches CSV from HuggingFace and converts to JSON Array
+// Fetches dataset from HuggingFace and converts to JSON Array
 
 // Store for the knowledge base
 let knowledgeBase = [];
 
-// HuggingFace dataset URL
-const DATASET_URL = 'https://huggingface.co/datasets/amkyawdev/AmkyawDev-Dataset/resolve/main';
-
 /**
- * Fetch CSV file and convert to JSON array
+ * Load knowledge base from HuggingFace dataset
  * @returns {Promise<Array>} Array of {role, content} objects
  */
 export async function loadKnowledgeBase() {
     try {
-        // Load from all three CSV files from HuggingFace
+        // Use HuggingFace Inference API to load dataset info
+        // Or use the dataset viewer API
+        const datasetUrl = 'https://huggingface.co/datasets/amkyawdev/AmkyawDev-Dataset';
+        
+        // Try loading from dataset files directly
         const files = [
-            `${DATASET_URL}/train.csv`,
-            `${DATASET_URL}/test.csv`,
-            `${DATASET_URL}/validation.csv`
+            'train.csv',
+            'test.csv', 
+            'validation.csv'
         ];
+        
         const allData = [];
         
         for (const file of files) {
             try {
-                const response = await fetch(file);
-                if (response.ok) {
+                const response = await fetch(`${datasetUrl}/raw/main/${file}`);
+                if (!response.ok) {
+                    // Try alternative URL
+                    const altResponse = await fetch(`${datasetUrl}/resolve/main/${file}`);
+                    if (altResponse.ok) {
+                        const csvText = await altResponse.text();
+                        const parsed = parseCSV(csvText);
+                        allData.push(...parsed);
+                        console.log(`Loaded ${parsed.length} entries from ${file}`);
+                    }
+                } else {
                     const csvText = await response.text();
                     const parsed = parseCSV(csvText);
                     allData.push(...parsed);
-                    console.log(`Loaded ${parsed.length} entries from ${file.split('/').pop()}`);
+                    console.log(`Loaded ${parsed.length} entries from ${file}`);
                 }
             } catch (e) {
-                console.warn(`Could not load ${file}:`, e);
+                console.warn(`Could not load ${file}:`, e.message);
             }
+        }
+        
+        // If still no data, load a small sample from known data
+        if (allData.length === 0) {
+            console.log('Using fallback sample data');
+            allData.push(...getSampleData());
         }
         
         knowledgeBase = allData;
@@ -40,8 +57,25 @@ export async function loadKnowledgeBase() {
         return knowledgeBase;
     } catch (error) {
         console.error('Error loading knowledge base:', error);
-        return [];
+        // Load sample data on error
+        knowledgeBase = getSampleData();
+        return knowledgeBase;
     }
+}
+
+/**
+ * Get sample data when dataset cannot be loaded
+ * @returns {Array} Sample conversation pairs
+ */
+function getSampleData() {
+    return [
+        { role: 'user', content: 'ဟိုင်း' },
+        { role: 'assistant', content: 'ဟိုင်း၊ ဘာများ ကူညီပေးရမလဲခင်ဗျာ။' },
+        { role: 'user', content: 'မင်္ဂလာပါ' },
+        { role: 'assistant', content: 'မင်္ဂလာပ။ ဘာများကူညီပေးရမလဲ။' },
+        { role: 'user', content: 'နေကောင်းလား' },
+        { role: 'assistant', content: 'နေကောင်းပါတယ်။ သင်ရော နေကောင်းရဲ့လား။' },
+    ];
 }
 
 /**
