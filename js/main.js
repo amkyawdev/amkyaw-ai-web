@@ -1,7 +1,13 @@
 // Main module - Orchestrator
 
+// Debug: Check if script loads
+console.log('🔔 main.js loaded');
+
 import { findLocalAnswer } from './database.js';
 import { addMessage, showTypingIndicator, removeTypingIndicator, scrollToBottom, clearMessages, setSuggestionHandlers } from './ui-manager.js';
+
+// Debug: Check imports
+console.log('🔔 Imports loaded');
 
 // DOM Elements
 const userInput = document.getElementById('user-input');
@@ -11,6 +17,10 @@ const menuToggle = document.getElementById('menu-toggle');
 const sidemenu = document.getElementById('sidemenu');
 const closeSidemenu = document.getElementById('close-sidemenu');
 const chatList = document.getElementById('chat-list');
+
+// Debug: Check DOM elements
+console.log('🔔 userInput:', userInput);
+console.log('🔔 sendBtn:', sendBtn);
 
 // State
 let isProcessing = false;
