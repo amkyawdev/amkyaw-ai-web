@@ -1,13 +1,7 @@
 // Main module - Orchestrator
 
-// Debug: Check if script loads
-console.log('🔔 main.js loaded');
-
 import { findLocalAnswer } from './database.js';
 import { addMessage, showTypingIndicator, removeTypingIndicator, scrollToBottom, clearMessages, setSuggestionHandlers } from './ui-manager.js';
-
-// Debug: Check imports
-console.log('🔔 Imports loaded');
 
 // DOM Elements
 const userInput = document.getElementById('user-input');
@@ -18,18 +12,15 @@ const sidemenu = document.getElementById('sidemenu');
 const closeSidemenu = document.getElementById('close-sidemenu');
 const chatList = document.getElementById('chat-list');
 
-// Debug: Check DOM elements
-console.log('🔔 userInput:', userInput);
-console.log('🔔 sendBtn:', sendBtn);
-
 // State
 let isProcessing = false;
 let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+let currentMessages = [];
 
 /**
  * Initialize the application
  */
-async function init() {
+function init() {
     console.log('🤖 Amkyaw AI initializing...');
     
     // Render chat history
@@ -45,7 +36,10 @@ async function init() {
  * Render chat history in sidemenu
  */
 function renderChatHistory() {
-    if (!chatList) return;
+    if (!chatList) {
+        console.warn('chatList element not found');
+        return;
+    }
     
     chatList.innerHTML = '';
     
@@ -72,17 +66,15 @@ function renderChatHistory() {
 function saveChat(messages) {
     if (messages.length === 0) return;
     
-    // Get title from first user message
     const firstUserMessage = messages.find(m => m.role === 'user');
     const title = firstUserMessage ? firstUserMessage.content.substring(0, 30) : 'New Chat';
     
     chatHistory.push({
         title: title,
-        messages: messages.slice(0, 20), // Limit stored messages
+        messages: messages.slice(0, 20),
         timestamp: Date.now()
     });
     
-    // Keep only last 50 chats
     if (chatHistory.length > 50) {
         chatHistory = chatHistory.slice(-50);
     }
@@ -100,12 +92,10 @@ function loadChat(index) {
     
     clearMessages();
     
-    // Re-render messages
     chat.messages.forEach(msg => {
         addMessage(msg.role, msg.content, false);
     });
     
-    // Close sidemenu
     if (sidemenu) {
         sidemenu.classList.remove('active');
     }
@@ -125,24 +115,30 @@ function escapeHtml(text) {
  */
 function setupEventListeners() {
     // Send button click
-    sendBtn.addEventListener('click', handleSendMessage);
+    if (sendBtn) {
+        sendBtn.addEventListener('click', handleSendMessage);
+    }
     
     // Enter key in textarea
-    userInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    });
-    
-    // Auto-resize textarea
-    userInput.addEventListener('input', () => {
-        userInput.style.height = 'auto';
-        userInput.style.height = Math.min(userInput.scrollHeight, 160) + 'px';
-    });
+    if (userInput) {
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+        
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+        });
+    }
     
     // New chat button
-    newChatBtn.addEventListener('click', handleNewChat);
+    if (newChatBtn) {
+        newChatBtn.addEventListener('click', handleNewChat);
+    }
     
     // Sidemenu toggle
     if (menuToggle && sidemenu) {
@@ -159,18 +155,20 @@ function setupEventListeners() {
     
     // Suggestion buttons
     setSuggestionHandlers((text) => {
-        userInput.value = text;
+        if (userInput) userInput.value = text;
         handleSendMessage();
     });
 }
 
-// Store current messages for history
-let currentMessages = [];
-
 /**
  * Handle send message
  */
-async function handleSendMessage() {
+function handleSendMessage() {
+    if (!userInput || !sendBtn) {
+        console.error('DOM elements not found');
+        return;
+    }
+    
     const message = userInput.value.trim();
     
     if (!message || isProcessing) return;
@@ -184,41 +182,40 @@ async function handleSendMessage() {
     currentMessages.push({ role: 'user', content: message });
     
     // Process the message
-    await processMessage(message);
+    processMessage(message);
 }
 
 /**
  * Process the user message
- * @param {string} message - User's message
  */
-async function processMessage(message) {
+function processMessage(message) {
     isProcessing = true;
     
     try {
-        // Show typing indicator
         const indicator = showTypingIndicator();
         
-        // Get response from local CSV database
-        const response = await findLocalAnswer(message);
-        
-        // Remove typing indicator
-        removeTypingIndicator();
-        
-        // Add assistant response with streaming effect
-        addMessage('assistant', response, true);
-        currentMessages.push({ role: 'assistant', content: response });
-        
-        // Save to history after response
-        setTimeout(() => {
-            saveChat(currentMessages);
-        }, 500);
+        findLocalAnswer(message).then(response => {
+            removeTypingIndicator();
+            
+            addMessage('assistant', response, true);
+            currentMessages.push({ role: 'assistant', content: response });
+            
+            setTimeout(() => {
+                saveChat(currentMessages);
+            }, 500);
+            
+            isProcessing = false;
+        }).catch(error => {
+            console.error('Error getting answer:', error);
+            removeTypingIndicator();
+            addMessage('assistant', 'အမှားဖြစ်သွားပါတယ်။ နောက်တစ်ခါ ကြိုးစားပါကွာ။', false);
+            currentMessages.push({ role: 'assistant', content: 'အမှားဖြစ်သွားပါတယ်။ နောက်တစ်ခါ ကြိုးစားပါကွာ။' });
+            isProcessing = false;
+        });
         
     } catch (error) {
         console.error('Error processing message:', error);
         removeTypingIndicator();
-        addMessage('assistant', 'အမှားဖြစ်သွားပါတယ်။ နောက်တစ်ခါ ကြိုးစားပါကွာ။', false);
-        currentMessages.push({ role: 'assistant', content: 'အမှားဖြစ်သွားပါတယ်။ နောက်တစ်ခါ ကြိုးစားပါကွာ။' });
-    } finally {
         isProcessing = false;
     }
 }
@@ -227,7 +224,6 @@ async function processMessage(message) {
  * Handle new chat
  */
 function handleNewChat() {
-    // Save current chat before clearing
     if (currentMessages.length > 0) {
         saveChat(currentMessages);
     }
