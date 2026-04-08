@@ -1,16 +1,16 @@
 // UI Manager module - Renderer Molecule
 // Handles message bubble rendering and auto-scroll
 
-const chatContainer = document.getElementById('chat-container');
-const welcomeScreen = document.getElementById('welcome-screen');
-const suggestionButtons = document.getElementById('suggestion-buttons');
-
 /**
  * Add a message to the chat container
  * @param {string} role - 'user' or 'assistant'
  * @param {string} content - The message content
  */
 export function addMessage(role, content) {
+    const chatContainer = document.getElementById('chat-container');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const suggestionButtons = document.getElementById('suggestion-buttons');
+    
     // Hide welcome screen and suggestions after first message
     if (welcomeScreen) welcomeScreen.style.display = 'none';
     if (suggestionButtons) suggestionButtons.style.display = 'none';
@@ -42,6 +42,10 @@ export function addMessage(role, content) {
  * @returns {HTMLElement} The typing indicator element
  */
 export function showTypingIndicator() {
+    const chatContainer = document.getElementById('chat-container');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const suggestionButtons = document.getElementById('suggestion-buttons');
+    
     // Hide welcome screen and suggestions
     if (welcomeScreen) welcomeScreen.style.display = 'none';
     if (suggestionButtons) suggestionButtons.style.display = 'none';
@@ -72,13 +76,20 @@ export function removeTypingIndicator() {
  * Scroll chat container to bottom
  */
 export function scrollToBottom() {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    const chatContainer = document.getElementById('chat-container');
+    if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
 }
 
 /**
  * Clear all messages (for new chat)
  */
 export function clearMessages() {
+    const chatContainer = document.getElementById('chat-container');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const suggestionButtons = document.getElementById('suggestion-buttons');
+    
     // Remove all message elements
     const messages = chatContainer.querySelectorAll('.chat-message, .typing-indicator');
     messages.forEach(msg => msg.remove());

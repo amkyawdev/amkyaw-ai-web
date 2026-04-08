@@ -1,8 +1,13 @@
 // Main module - The Brain Molecule
 // Coordinates all other modules: database and UI (local dataset only)
 
+// Debug alert to check if file is loading
+console.log('main.js is loading...');
+
 import { loadKnowledgeBase, findLocalAnswer } from './database.js';
 import { addMessage, showTypingIndicator, removeTypingIndicator, scrollToBottom, clearMessages, setSuggestionHandlers } from './ui-manager.js';
+
+console.log('Imports done');
 
 // DOM Elements
 const userInput = document.getElementById('user-input');
@@ -28,6 +33,11 @@ async function init() {
     setupEventListeners();
     
     console.log('✅ Amkyaw AI ready!');
+    
+    // Debug: Test button click
+    document.getElementById('send-btn').addEventListener('click', () => {
+        console.log('Send button clicked!');
+    });
 }
 
 /**

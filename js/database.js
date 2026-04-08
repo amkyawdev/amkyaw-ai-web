@@ -10,45 +10,38 @@ let knowledgeBase = [];
  */
 export async function loadKnowledgeBase() {
     try {
-        // Use HuggingFace Inference API to load dataset info
-        // Or use the dataset viewer API
-        const datasetUrl = 'https://huggingface.co/datasets/amkyawdev/AmkyawDev-Dataset';
+        // Use GitHub raw URLs for amkyaw-mobile-v1 data
+        const datasetUrl = 'https://raw.githubusercontent.com/amkyawdev/amkyaw-mobile-v1/main';
         
-        // Try loading from dataset files directly
-        const files = [
-            'train.csv',
-            'test.csv', 
-            'validation.csv'
+        // Try to load from different possible data files
+        const possibleFiles = [
+            'data-layer/amkyaw_v2_gold.jsonl',
+            'data/train.jsonl',
+            'data/train.csv'
         ];
         
         const allData = [];
         
-        for (const file of files) {
+        for (const file of possibleFiles) {
             try {
-                const response = await fetch(`${datasetUrl}/raw/main/${file}`);
-                if (!response.ok) {
-                    // Try alternative URL
-                    const altResponse = await fetch(`${datasetUrl}/resolve/main/${file}`);
-                    if (altResponse.ok) {
-                        const csvText = await altResponse.text();
-                        const parsed = parseCSV(csvText);
+                const response = await fetch(`${datasetUrl}/${file}`);
+                if (response.ok) {
+                    const text = await response.text();
+                    const parsed = parseData(text, file);
+                    if (parsed.length > 0) {
                         allData.push(...parsed);
                         console.log(`Loaded ${parsed.length} entries from ${file}`);
+                        break;
                     }
-                } else {
-                    const csvText = await response.text();
-                    const parsed = parseCSV(csvText);
-                    allData.push(...parsed);
-                    console.log(`Loaded ${parsed.length} entries from ${file}`);
                 }
             } catch (e) {
                 console.warn(`Could not load ${file}:`, e.message);
             }
         }
         
-        // If still no data, load a small sample from known data
+        // If still no data, load sample data
         if (allData.length === 0) {
-            console.log('Using fallback sample data');
+            console.log('Using sample data');
             allData.push(...getSampleData());
         }
         
@@ -57,10 +50,60 @@ export async function loadKnowledgeBase() {
         return knowledgeBase;
     } catch (error) {
         console.error('Error loading knowledge base:', error);
-        // Load sample data on error
         knowledgeBase = getSampleData();
         return knowledgeBase;
     }
+}
+
+/**
+ * Parse different data formats
+ * @param {string} text - Raw data text
+ * @param {string} filename - File name to determine format
+ * @returns {Array} Parsed data
+ */
+function parseData(text, filename) {
+    if (filename.endsWith('.jsonl')) {
+        return parseJSONL(text);
+    } else if (filename.endsWith('.csv')) {
+        return parseCSV(text);
+    }
+    return [];
+}
+
+/**
+ * Parse JSONL format
+ * @param {string} text - JSONL text
+ * @returns {Array} Array of {role, content} objects
+ */
+function parseJSONL(text) {
+    const result = [];
+    const lines = text.trim().split('\n');
+    
+    for (const line of lines) {
+        try {
+            const obj = JSON.parse(line);
+            // Handle different JSON formats
+            if (Array.isArray(obj.messages)) {
+                for (const msg of obj.messages) {
+                    if (msg.role === 'user' || msg.role === 'assistant') {
+                        result.push({ role: msg.role, content: msg.content });
+                    }
+                }
+            } else if (obj.conversations) {
+                for (const conv of obj.conversations) {
+                    if (conv.role || conv.from) {
+                        result.push({ 
+                            role: conv.role || conv.from, 
+                            content: conv.content || conv.value 
+                        });
+                    }
+                }
+            }
+        } catch (e) {
+            // Skip malformed lines
+        }
+    }
+    return result;
 }
 
 /**
